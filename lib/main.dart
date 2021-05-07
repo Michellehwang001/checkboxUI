@@ -26,8 +26,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<String> items = <String>['A', 'B', 'C'];
-  final Set<int> checkedIndexes = {0, 2};
+  List<String> items = <String>['A', 'B', 'C'];
+  final Set<int> checkedIndexes = {};
   final _textController = TextEditingController();
 
   @override
@@ -42,7 +42,16 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('할 일 목록'),
         actions: [
-          IconButton(icon: Icon(Icons.delete), onPressed: () {})
+          IconButton(icon: Icon(Icons.delete), onPressed: () {
+            setState(() {
+              items = items
+                  .asMap()
+                  .entries
+                  .where((e) => !checkedIndexes.contains(e.key))
+                  .map((e) => e.value).toList();
+            });
+            checkedIndexes.clear();
+          })
         ],
       ),
       body: ListView.separated(
@@ -55,15 +64,17 @@ class _MyHomePageState extends State<MyHomePage> {
               children: [
                 Checkbox(
                   onChanged: (bool newValue) {
-                    if(newValue == true) {
-                      checkedIndexes.add(index);
-                    } else {
-                      checkedIndexes.remove(index);
-                    }
+                    setState(() {
+                      if(newValue == true) {
+                        checkedIndexes.add(index);
+                      } else {
+                        checkedIndexes.remove(index);
+                      }
+                    });
                   },
                   value: checkedIndexes.contains(index),
                 ),
-                Text('Items ${items[index]}'),
+                Text('${items[index]}'),
               ],
             ),
           );
@@ -82,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (_) => AlertDialog(
           title: Text('할일 입력하세요!'),
           content: TextField(
+            autofocus: true,
             controller: _textController,
             decoration: InputDecoration(
               border: UnderlineInputBorder(),
